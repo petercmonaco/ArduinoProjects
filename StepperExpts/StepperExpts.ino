@@ -7,9 +7,7 @@
  * 
  * Documentation says that this motor has 513 steps per revolution.
  * 
- * Motor doesn't seem to go much faster than 6 RPMs.
- * I can't make it go backwards yet (although the MotorShield code can
- * make it go both ways).
+ * Motor doesn't seem to go much faster than 10 RPMs.
  */
  
 #include "MyStepper.h"
@@ -26,11 +24,10 @@ void setup() {
 }
 
 void loop() {
-  double rpms = 6;
+  double rpms = 10;
   // set the motor speed:
   myStepper.setRPMs(rpms);
-  // step 1/100 of a revolution:
-  myStepper.step(-1000);//stepsPerRevolution);
+  myStepper.step(-1000);
   //while (1) {}
 }
 
