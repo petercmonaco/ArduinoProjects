@@ -88,7 +88,9 @@ MyStepper::MyStepper(int number_of_steps, int motor_pin_1, int motor_pin_2)
   this->speed = 0;          // the motor speed, in revolutions per minute
   this->direction = 0;      // motor direction
   this->last_step_time = 0; // time stamp in us of the last step taken
-  this->number_of_steps = number_of_steps; // total number of steps for this motor
+  this->numMotorSteps = number_of_steps; // total number of steps for this motor
+  this->stepsPerStep = 4;
+  this->numMicroSteps = this->numMotorSteps * this->stepsPerStep;
 
   // Arduino pins for the motor control connection:
   this->motor_pin_1 = motor_pin_1;
@@ -105,6 +107,7 @@ MyStepper::MyStepper(int number_of_steps, int motor_pin_1, int motor_pin_2)
 
   // pin_count is used by the stepMotor() method:
   this->pin_count = 2;
+
 }
 
 
@@ -119,7 +122,9 @@ MyStepper::MyStepper(int number_of_steps, int motor_pin_1, int motor_pin_2,
   this->speed = 0;          // the motor speed, in revolutions per minute
   this->direction = 0;      // motor direction
   this->last_step_time = 0; // time stamp in us of the last step taken
-  this->number_of_steps = number_of_steps; // total number of steps for this motor
+  this->numMotorSteps = number_of_steps; // total number of steps for this motor
+  this->stepsPerStep = 4;
+  this->numMicroSteps = this->numMotorSteps * this->stepsPerStep;
 
   // Arduino pins for the motor control connection:
   this->motor_pin_1 = motor_pin_1;
@@ -152,7 +157,9 @@ MyStepper::MyStepper(int number_of_steps, int motor_pin_1, int motor_pin_2,
   this->speed = 0;          // the motor speed, in revolutions per minute
   this->direction = 0;      // motor direction
   this->last_step_time = 0; // time stamp in us of the last step taken
-  this->number_of_steps = number_of_steps; // total number of steps for this motor
+  this->numMotorSteps = number_of_steps; // total number of steps for this motor
+  this->stepsPerStep = 10;
+  this->numMicroSteps = this->numMotorSteps * this->stepsPerStep;
 
   // Arduino pins for the motor control connection:
   this->motor_pin_1 = motor_pin_1;
@@ -177,7 +184,7 @@ MyStepper::MyStepper(int number_of_steps, int motor_pin_1, int motor_pin_2,
  */
 void MyStepper::setSpeed(long whatSpeed)
 {
-  this->step_delay = 60L * 1000L * 1000L / this->number_of_steps / whatSpeed;
+  this->step_delay = 60L * 1000L * 1000L / this->numMicroSteps / whatSpeed;
 }
 
 /*
@@ -186,6 +193,7 @@ void MyStepper::setSpeed(long whatSpeed)
  */
 void MyStepper::step(int steps_to_move)
 {
+  steps_to_move *= this->stepsPerStep; // Multiply motor-steps to get micro-steps
   int steps_left = abs(steps_to_move);  // how many steps to take
 
   // determine direction based on whether steps_to_mode is + or -:
@@ -206,22 +214,19 @@ void MyStepper::step(int steps_to_move)
       // depending on direction:
       if (this->direction == 1) {
         this->step_number++;
-        if (this->step_number == this->number_of_steps) {
+        if (this->step_number == this->numMicroSteps) {
           this->step_number = 0;
         }
       } else {
         if (this->step_number == 0) {
-          this->step_number = this->number_of_steps;
+          this->step_number = this->numMicroSteps;
         }
         this->step_number--;
       }
       // decrement the steps left:
       steps_left--;
       // step the motor to step number 0, 1, ..., {3 or 10}
-      if (this->pin_count == 5)
-        stepMotor(this->step_number % 10);
-      else
-        stepMotor(this->step_number % 4);
+      stepMotor(this->step_number % this->stepsPerStep);
     }
   }
 }

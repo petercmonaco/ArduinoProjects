@@ -6,19 +6,21 @@
  * control chip that comes with it.  Different code is needed to use the
  * AdaFruit motor shield.
  * 
- * Documentation says that this motor has 513 steps per revolution,
- * but I found it's more like 2052 (exactly 4x).  Wondering if that has
- * to do with the software making 4 clicks per motor click.
+ * Documentation says that this motor has 513 steps per revolution.
+ * 
+ * Motor doesn't seem to go much faster than 5 RPMs with this code.
+ * I can't make it go backwards yet (although the MotorShield code can
+ * make it go both ways).
  */
  
-#include <Stepper.h>
+#include "MyStepper.h"
 
-const int stepsPerRevolution = 2052;  // change this to fit the number of steps per revolution
+const int stepsPerRevolution = 513;  // change this to fit the number of steps per revolution
 // for your motor
 
 
 // initialize the stepper library on pins 8 through 11:
-Stepper myStepper(stepsPerRevolution, 8, 9, 10, 11);
+MyStepper myStepper(stepsPerRevolution, 8, 9, 10, 11);
 
 int stepCount = 0;  // number of steps the motor has taken
 
@@ -36,7 +38,7 @@ void loop() {
     myStepper.setSpeed(motorSpeed);
     // step 1/100 of a revolution:
     myStepper.step(stepsPerRevolution);
-    while (1) {}
+    //while (1) {}
   }
 }
 
