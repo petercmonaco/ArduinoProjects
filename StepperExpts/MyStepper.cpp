@@ -87,7 +87,6 @@ MyStepper::MyStepper(int number_of_steps, int motor_pin_1, int motor_pin_2)
   this->step_number = 0;    // which step the motor is on
   this->speed = 0;          // the motor speed, in revolutions per minute
   this->direction = 0;      // motor direction
-  this->last_step_time = 0; // time stamp in us of the last step taken
   this->numMotorSteps = number_of_steps; // total number of steps for this motor
   this->stepsPerStep = 4;
   this->numMicroSteps = this->numMotorSteps * this->stepsPerStep;
@@ -121,7 +120,6 @@ MyStepper::MyStepper(int number_of_steps, int motor_pin_1, int motor_pin_2,
   this->step_number = 0;    // which step the motor is on
   this->speed = 0;          // the motor speed, in revolutions per minute
   this->direction = 0;      // motor direction
-  this->last_step_time = 0; // time stamp in us of the last step taken
   this->numMotorSteps = number_of_steps; // total number of steps for this motor
   this->stepsPerStep = 4;
   this->numMicroSteps = this->numMotorSteps * this->stepsPerStep;
@@ -156,7 +154,6 @@ MyStepper::MyStepper(int number_of_steps, int motor_pin_1, int motor_pin_2,
   this->step_number = 0;    // which step the motor is on
   this->speed = 0;          // the motor speed, in revolutions per minute
   this->direction = 0;      // motor direction
-  this->last_step_time = 0; // time stamp in us of the last step taken
   this->numMotorSteps = number_of_steps; // total number of steps for this motor
   this->stepsPerStep = 10;
   this->numMicroSteps = this->numMotorSteps * this->stepsPerStep;
@@ -180,11 +177,11 @@ MyStepper::MyStepper(int number_of_steps, int motor_pin_1, int motor_pin_2,
 }
 
 /*
- * Sets the speed in revs per minute
+ * Sets the speed in RPMs
  */
-void MyStepper::setSpeed(long whatSpeed)
+void MyStepper::setRPMs(double rpms)
 {
-  this->step_delay = 60L * 1000L * 1000L / this->numMicroSteps / whatSpeed;
+  this->step_delay = 60.0 * 1000L * 1000L / this->numMicroSteps / rpms;
 }
 
 /*
@@ -200,16 +197,16 @@ void MyStepper::step(int steps_to_move)
   if (steps_to_move > 0) { this->direction = 1; }
   if (steps_to_move < 0) { this->direction = 0; }
 
+  unsigned long firstStepTime = micros();
+  unsigned long stepsTaken = 0;
 
   // decrement the number of steps, moving one step each time:
   while (steps_left > 0)
   {
     unsigned long now = micros();
     // move only if the appropriate delay has passed:
-    if (now - this->last_step_time >= this->step_delay)
-    {
-      // get the timeStamp of when you stepped:
-      this->last_step_time = now;
+    if (now - firstStepTime >= (this->step_delay * stepsTaken)) {
+
       // increment or decrement the step number,
       // depending on direction:
       if (this->direction == 1) {
@@ -225,6 +222,7 @@ void MyStepper::step(int steps_to_move)
       }
       // decrement the steps left:
       steps_left--;
+      stepsTaken++;
       // step the motor to step number 0, 1, ..., {3 or 10}
       stepMotor(this->step_number % this->stepsPerStep);
     }

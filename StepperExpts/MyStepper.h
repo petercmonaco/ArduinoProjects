@@ -91,7 +91,7 @@ class MyStepper {
                                  int motor_pin_5);
 
     // speed setter method:
-    void setSpeed(long whatSpeed);
+    void setRPMs(double rpms);
 
     // mover method:
     void step(int number_of_steps);
@@ -103,7 +103,7 @@ class MyStepper {
 
     int direction;            // Direction of rotation
     int speed;                // Speed in RPMs
-    unsigned long step_delay; // delay between steps, in ms, based on speed
+    double step_delay; // delay between steps, in ms, based on speed
     int numMotorSteps;        // total number of steps this motor can take
     int stepsPerStep;         // Total number of pin output combinations per motor step
     int numMicroSteps;        // Product of previous two
@@ -116,8 +116,6 @@ class MyStepper {
     int motor_pin_3;
     int motor_pin_4;
     int motor_pin_5;          // Only 5 phase motor
-
-    unsigned long last_step_time; // time stamp in us of when the last step was taken
 };
 
 #endif
