@@ -10,7 +10,6 @@ Displays the currently pressed key on the LCD screen.
 Key Codes (in left-to-right order):
 */
 
-const int KEY_NO_VALUE = -1;
 const int KEY_NONE = 0;
 const int KEY_Select = 1;
 const int KEY_Left = 2;
@@ -48,25 +47,23 @@ void setup()
 void loop() 
 {
   int key = nextKeypadKey();
-  
-  if (key != KEY_NO_VALUE) {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Current Key:");
-    lcd.setCursor(0, 1);
-    if (key == KEY_NONE) {
-      lcd.print("(none)");
-    } else if (key == KEY_Select) {
-      lcd.print("Select");
-    } else if (key == KEY_Left) {
-      lcd.print("Left");
-    } else if (key == KEY_Up) {
-      lcd.print("Up");
-    } else if (key == KEY_Down) {
-      lcd.print("Down");
-    } else if (key == KEY_Right) {
-      lcd.print("Right");
-    }
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Current Key:");
+  lcd.setCursor(0, 1);
+  if (key == KEY_NONE) {
+    lcd.print("(none)");
+  } else if (key == KEY_Select) {
+    lcd.print("Select");
+  } else if (key == KEY_Left) {
+    lcd.print("Left");
+  } else if (key == KEY_Up) {
+    lcd.print("Up");
+  } else if (key == KEY_Down) {
+    lcd.print("Down");
+  } else if (key == KEY_Right) {
+    lcd.print("Right");
   }
 }
 
@@ -75,22 +72,36 @@ void loop()
 // Code for reading and debouncing the keypad
 //
 int lastKey = 0;
+int lastKeyUpTime = millis();
 int nextKeypadKey() {
-  // keypad.getKey() grabs the current key.
-  // Returns a non-zero integer corresponding to the pressed key, OR
-  // Returns 0 for no keys pressed, OR
-  // Returns -1 (sample wait) when no key is available to be sampled.
-  int currKey = keypad.getKey();
-  if (currKey == -1) {
-    // There is no key available to be sampled
-    return KEY_NO_VALUE;
+  while (1) {
+    // keypad.getKey() grabs the current key.
+    // Returns a non-zero integer corresponding to the pressed key, OR
+    // Returns 0 for no keys pressed, OR
+    // Returns -1 (sample wait) when no key is available to be sampled.
+    int currKey = keypad.getKey();
+    if (currKey == -1) {
+      // There is no key available to be sampled
+      continue;
+    }
+    if (currKey == lastKey) {
+      // No change since last time
+      continue;
+    }
+
+    if (currKey == 0 && lastKey != 0) {
+      // Transition from key-down to no-key
+      lastKey = 0;
+      lastKeyUpTime = millis();
+      return 0;
+    }
+    
+    // Do some de-bouncing.  Don't allow a key-down sooner than 200ms after key-up
+    if (currKey > 0 && lastKey == 0 && ((millis()-lastKeyUpTime) > 200)) {
+      // Transition from no-key to a key
+      lastKey = currKey;
+      return currKey;
+    }
   }
-  if (currKey == lastKey) {
-    // No change since last time
-    return KEY_NO_VALUE;
-  }
-  
-  lastKey = currKey;
-  return currKey;
 }
 
