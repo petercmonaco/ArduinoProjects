@@ -96,8 +96,8 @@ int nextKeypadKey() {
       return 0;
     }
     
-    // Do some de-bouncing.  Don't allow a key-down sooner than 200ms after key-up
-    if (currKey > 0 && lastKey == 0 && ((millis()-lastKeyUpTime) > 200)) {
+    // Do some de-bouncing.  Don't allow a key-down sooner than 100ms after key-up
+    if (currKey > 0 && lastKey == 0 && ((millis()-lastKeyUpTime) > 100)) {
       // Transition from no-key to a key
       lastKey = currKey;
       return currKey;
