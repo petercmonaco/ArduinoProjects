@@ -66,12 +66,17 @@ void loop()
   lcd.clear();
   lcd.noBlink();
   lcd.setCursor(0, 0);
+  lcd.print(num);
+  lcd.print(" ");
+  lcd.print(unitsToString(units));
+  lcd.print("/rev");
+  lcd.setCursor(0, 1);
   if (goLeft) {
-    lcd.print("To the Left!");
+    lcd.print("...to the Left!");
   } else {
-    lcd.print("To the Right!");
+    lcd.print("...to the Right!");
   }
-  delay(1000);
+  delay(100000);
 }
 
 String unitsToString(int units) {
