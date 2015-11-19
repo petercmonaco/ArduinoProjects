@@ -39,21 +39,22 @@ void setup()
   */
   keypad.setRate(10);
 
+  stepperSetup();
 }
 
 void loop() 
 {
   // Get seconds/minutes/hours per revolution
-  int num = collectInt("S/M/H per rev:");
+  int unitsPerRev = collectInt("S/M/H per rev:");
   
   // Determine units (seconds/minutes/hours)
-  int units = determineUnits(num);
+  int units = determineUnits(unitsPerRev);
 
   // Announce the decision
   lcd.clear();
   lcd.noBlink();
   lcd.setCursor(0, 0);
-  lcd.print(num);
+  lcd.print(unitsPerRev);
   lcd.print(" ");
   lcd.print(unitsToString(units));
   delay(1000);
@@ -66,7 +67,7 @@ void loop()
   lcd.clear();
   lcd.noBlink();
   lcd.setCursor(0, 0);
-  lcd.print(num);
+  lcd.print(unitsPerRev);
   lcd.print(" ");
   lcd.print(unitsToString(units));
   lcd.print("/rev");
@@ -76,7 +77,20 @@ void loop()
   } else {
     lcd.print("...to the Right!");
   }
-  delay(100000);
+
+  double minutesPerRev = 1;
+  if (units == UNITS_Seconds) {
+    minutesPerRev = unitsPerRev / 60.0;
+  } else if (units == UNITS_Minutes) {
+    minutesPerRev = unitsPerRev;
+  } else if (units == UNITS_Hours) {
+    minutesPerRev = unitsPerRev * 60;
+  }
+
+  double rpms = 1.0/minutesPerRev;
+  rpms *= 60/16; // To correct for the 16:60 geardown
+  int dir = goLeft? 1 : -1;
+  stepperLoop(rpms, dir  );
 }
 
 String unitsToString(int units) {
