@@ -59,6 +59,28 @@ void loop()
   lcd.print(unitsToString(units));
   delay(1000);
 
+  // Compute minutes per revolution
+  double minutesPerRev = 1;
+  if (units == UNITS_Seconds) {
+    minutesPerRev = unitsPerRev / 60.0;
+  } else if (units == UNITS_Minutes) {
+    minutesPerRev = unitsPerRev;
+  } else if (units == UNITS_Hours) {
+    minutesPerRev = unitsPerRev * 60;
+  }
+
+  // If too slow or too fast, reject the settings.
+  if (minutesPerRev < 0.32) { // < 20 seconds per rev is too fast for the stepper
+    printTwoLineMessage("Too fast: Max is", "      20 sec/rev");
+    delay(3000);
+    return;
+  }
+  if (minutesPerRev > (24 * 60 + 1)) { // > 1 rev/day is too slow for the software.  Underflow I think
+    printTwoLineMessage("Too slow: Max is", "      1 rev/day");
+    delay(3000);
+    return;
+  }
+
   
   // Next, choose Left or Right.  Only legal keys are left, right, and select
   chooseLeftOrRight();
@@ -78,15 +100,6 @@ void loop()
     lcd.print("...to the Right!");
   }
 
-  double minutesPerRev = 1;
-  if (units == UNITS_Seconds) {
-    minutesPerRev = unitsPerRev / 60.0;
-  } else if (units == UNITS_Minutes) {
-    minutesPerRev = unitsPerRev;
-  } else if (units == UNITS_Hours) {
-    minutesPerRev = unitsPerRev * 60;
-  }
-
   double rpms = 1.0/minutesPerRev;
   rpms *= 60/16; // To correct for the 16:60 geardown
   int dir = goLeft? 1 : -1;
@@ -100,12 +113,17 @@ String unitsToString(int units) {
   return "BadValue";
 }
 
-void chooseLeftOrRight() {
+void printTwoLineMessage(String line1, String line2) {
   lcd.clear();
+  lcd.noBlink();
   lcd.setCursor(0, 0);
-  lcd.print("Select dir:");
+  lcd.print(line1);
   lcd.setCursor(0, 1);
-  lcd.print("Left/Right");
+  lcd.print(line2);
+}
+
+void chooseLeftOrRight() {
+  printTwoLineMessage("Select dir:", "Left/Right");
   int cursorX = 0;
   while (1) {
     lcd.setCursor(cursorX, 1);
@@ -149,11 +167,7 @@ int determineUnits(int numUnits) {
 
 int collectInt(String prompt) {
   int collectedNumber = 0;
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(prompt);
-  lcd.setCursor(0, 1);
-  lcd.print("1234567890 Enter");
+  printTwoLineMessage(prompt, "1234567890 Enter");
   // Valid position of X cursor are 0/1/2/3/4/5/6/7/8/9/11
   // Corresponding to               1/2/3/4/5/6/7/8/9/0/Enter
   int cursorX = 0;
