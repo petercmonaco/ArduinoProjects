@@ -5,7 +5,7 @@
  
 #include "MyStepper.h"
 
-const int stepsPerRevolution = 510;
+const int stepsPerRevolution = 512;
 
 // I'm using analog pins A1-A4 simply because it's easier to solder to those pins on the LCD shield.
 MyStepper myStepper(stepsPerRevolution, A1, A2, A3, A4);

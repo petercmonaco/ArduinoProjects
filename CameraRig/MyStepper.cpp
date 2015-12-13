@@ -68,20 +68,21 @@ void MyStepper::step(int steps_to_move)
       // depending on direction:
       if (this->direction == 1) {
         this->step_number++;
-        if (this->step_number == this->numMicroSteps) {
+        if (this->step_number >= 4) {
           this->step_number = 0;
         }
       } else {
-        if (this->step_number == 0) {
-          this->step_number = this->numMicroSteps;
-        }
         this->step_number--;
+        if (this->step_number <= -1) {
+          this->step_number = 3;
+        }
       }
+      
       // decrement the steps left:
       steps_left--;
       stepsTaken++;
-      // step the motor to step number 0, 1, ..., {3 or 10}
-      stepMotor(this->step_number % this->stepsPerStep);
+      // step the motor to step number 0 or 1 or 2 or 3
+      stepMotor(this->step_number);
     }
   }
 }

@@ -101,7 +101,7 @@ void loop()
   }
 
   double rpms = 1.0/minutesPerRev;
-  rpms *= 60/16; // To correct for the 16:60 geardown
+  rpms *= 60.0/16.0; // To correct for the 16:60 geardown
   int dir = goLeft? 1 : -1;
   stepperLoop(rpms, dir  );
 }
